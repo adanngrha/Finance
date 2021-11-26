@@ -42,27 +42,6 @@ if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
 
-@app.route("/")
-@login_required
-def index():
-    """Show portfolio of stocks"""
-    return apology("TODO")
-
-
-@app.route("/buy", methods=["GET", "POST"])
-@login_required
-def buy():
-    """Buy shares of stock"""
-    return apology("TODO")
-
-
-@app.route("/history")
-@login_required
-def history():
-    """Show history of transactions"""
-    return apology("TODO")
-
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -110,16 +89,30 @@ def logout():
     return redirect("/")
 
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    return apology("TODO")
+
+
 @app.route("/quote", methods=["GET", "POST"])
-@login_required
+@login_required  # decorator
 def quote():
     """Get stock quote."""
     return apology("TODO")
 
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    """Register user"""
+@app.route("/buy", methods=["GET", "POST"])
+@login_required
+def buy():
+    """Buy shares of stock"""
+    return apology("TODO")
+
+
+@app.route("/")
+@login_required
+def index():
+    """Show portfolio of stocks"""
     return apology("TODO")
 
 
@@ -127,6 +120,13 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
+    return apology("TODO")
+
+
+@app.route("/history")
+@login_required
+def history():
+    """Show history of transactions"""
     return apology("TODO")
 
 
