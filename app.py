@@ -1,6 +1,8 @@
 from datetime import datetime
 import os
 import re
+from threading import current_thread
+from urllib.parse import uses_netloc
 
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
@@ -206,11 +208,34 @@ def buy():
         # Transaction datetime
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Store transactions to database
-        db.execute("INSERT INTO transactions(user_id, transaction_type, symbol, company_name, shares, price, transacted) VALUES(?, ?, ?, ?, ?, ?, ?)", user_id, "buy", company["symbol"], company["name"], shares, price, now)
+        # Store companies data to database (companies table) otherwise if company already there, ignore
+        db.execute("INSERT OR IGNORE INTO companies (symbol, company_name) VALUES (?, ?)", symbol, company["name"])
         
-        # Update user cash
-        db.execute("UPDATE users SET cash = ? WHERE id = ?", cash - price, user_id)
+        company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", symbol)
+        company_id = company_id[0]["id"]
+
+        check_assets = db.execute("SELECT * FROM assets WHERE company_id = ?", company_id)
+        check_assets = len(check_assets)
+        
+        if check_assets != 1:
+            # Store new assets data to database (assets table)
+            db.execute("INSERT OR IGNORE INTO assets (user_id, company_id, current_shares) VALUES (?, ?, ?)",
+                   user_id, company_id, shares)
+        else:
+            current_shares = db.execute("SELECT current_shares FROM assets WHERE company_id = ?", company_id)
+            current_shares = current_shares[0]["current_shares"]
+            current_shares = current_shares + shares
+            
+            # Update the shares value
+            db.execute("UPDATE assets SET current_shares = ? WHERE company_id = ?", current_shares, company_id)
+
+        # Store transactions data to database (transaction table)
+        db.execute("INSERT INTO transactions (user_id, company_id, transaction_type, shares, price, transacted) VALUES (?, ?, ?, ?, ?, ?)",
+                   user_id, company_id, "buy", shares, price, now)
+
+        # Update user cash (users table)
+        cash = cash - price
+        db.execute("UPDATE users SET cash = ? WHERE id = ?", cash, user_id)
 
         # Redirect user to homepage
         return redirect("/")
@@ -225,8 +250,31 @@ def buy():
 def index():
     """Show portfolio of stocks"""
     if request.method == "POST":
-        redirect("/")
+        
+        # Get user company symbols list
+        symbols = db.execute("")
+        
+        # Get user company names list
+        symbols = db.execute("")
+        
+        # Get user current shares (assets table)
+        shares = db.execute("")
+        
+        # Lookup        
+        
+        # Get current stock price
+        
+        # Get total price of the stock
+        
+        # Total money
+        
+        # Update user cash
+        db.execute("")
+        
+        # Redirect user to homepage
+        return redirect("/")
 
+    # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("index.html")
 
@@ -236,7 +284,7 @@ def index():
 def sell():
     """Sell shares of stock"""
     if request.method == "POST":
-        redirect("/")
+        return redirect("/")
 
     else:
         return render_template("sell.html")
@@ -247,7 +295,7 @@ def sell():
 def history():
     """Show history of transactions"""
     if request.method == "POST":
-        redirect("/")
+        return redirect("/")
 
     else:
         return render_template("history.html")
