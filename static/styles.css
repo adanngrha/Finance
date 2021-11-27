@@ -38,6 +38,8 @@ main
 
     /* Center contents */
     text-align: center;
+
+    width: 100%;
 }
 
 main img

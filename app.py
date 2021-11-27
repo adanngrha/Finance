@@ -1,4 +1,6 @@
+from datetime import datetime
 import os
+import re
 
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
@@ -139,14 +141,21 @@ def quote():
     """Get stock quote."""
     if request.method == "POST":
         
-        symbol = request.form.get("symbol")
+        # Ensure symbol was submitted
+        if not request.form.get("symbol"):
+            return apology("Symbol required", 403)
         
-        lookup(symbol)
+        # This is dictionary
+        company = lookup(request.form.get("symbol"))
         
-        return render_template("quoted.html")
+        # Handle if stocks doesn't exists
+        if company == None:
+            return apology("Stocks doesn't exists", 403)
+  
+        return render_template("quoted.html", company=company)
     
+    # User reached route via GET (as by clicking a link or via redirect)
     else:
-        # User reached route via GET (as by clicking a link or via redirect)
         return render_template("quote.html")
 
 
@@ -155,8 +164,58 @@ def quote():
 def buy():
     """Buy shares of stock"""
     if request.method == "POST":
-        redirect("/")
         
+        # Get user_id
+        user_id = session.get("user_id")
+        
+        symbol = request.form.get("symbol")
+        shares = request.form.get("shares")
+        shares = int(shares)
+        
+        # Ensure symbol was submitted
+        if not symbol:
+            return apology("Symbol required", 403)
+        
+        # Ensure shares was positive integer
+        if not shares > 0:
+            return apology("Shares must positive integer", 403)
+        
+        # This is dictionary
+        company = lookup(symbol)
+
+        # Ensure stocks exists
+        if company == None:
+            return apology("Stocks doesn't exists", 403)
+        
+        # Ensure shares was submitted
+        elif not shares:
+            return apology("Shares required", 403)
+        
+        # Times stocks price with shares
+        price = company["price"] * shares
+        
+        # Get user cash
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)
+        cash = cash[0]["cash"]
+        cash = float(cash)
+        
+        # Ensure user cash is enough 
+        if cash < price:
+            return apology("User cash is not enough to buy", 403)
+        
+        # Transaction datetime
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Store transactions to database
+        db.execute("INSERT INTO transactions(user_id, transaction_type, symbol, company_name, shares, price, transacted) VALUES(?, ?, ?, ?, ?, ?, ?)", user_id, "buy", company["symbol"], company["name"], shares, price, now)
+        
+        # Update user cash
+        db.execute("UPDATE users SET cash = ? WHERE id = ?", cash - price, user_id)
+
+        # Redirect user to homepage
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("buy.html")    
 
