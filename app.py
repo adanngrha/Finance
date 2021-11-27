@@ -35,7 +35,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finasssnce.db")
+db = SQL("sqlite:///finance.db")
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
@@ -43,7 +43,7 @@ if not os.environ.get("API_KEY"):
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login():s
+def login():
     """Log user in"""
 
     # Forget any user_id
@@ -93,41 +93,41 @@ def logout():
 def register():
     """Register user"""
     if request.method == "POST":
-        
+
         # Ensure username was submitted
         username = request.form.get("username")
         password = request.form.get("password")
-        password-confirm = request.form.get("password-confirmation")
-        
+        passwordConfirm = request.form.get("password-confirmation")
+
         if not username:
             return apology("must provide username", 403)
 
         # Ensure password was submitted
         elif not password:
             return apology("must provide password", 403)
-        
+
         # Ensure password-confirmation was submitted
-        elif not password-confirm:
+        elif not passwordConfirm:
             return apology("must provide password confirmation", 403)
-        
+
         # Ensure password and password-confirmation is matched
-        elif password != password-confirm:
-            return apology("password not match with the password confirmation", 403)
-        
+        elif password != passwordConfirm:
+            return apology("password not matched with the password confirmation", 403)
+
         # Hash password
         hash = generate_password_hash(password)
-        
+
         # Store username and hashed password to the database
-        store = db.execute("INSERT INTO users ")
-        
+        db.execute("INSERT INTO users (username, hash, cash) VALUES (?, ?, ?)", username, hash, 10000)
+ 
         rows = db.execute("SELECT * FROM users WHERE username = ?", username)
-        
+
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
         return redirect("/")
-    
+
     else:
         # User reached route via GET (as by clicking a link or via redirect)
         return render_template("register.html")
@@ -137,35 +137,61 @@ def register():
 @login_required  # decorator
 def quote():
     """Get stock quote."""
-    return apology("TODO")
+    if request.method == "POST":
+        
+        symbol = request.form.get("symbol")
+        
+        lookup(symbol)
+        
+        return render_template("quoted.html")
+    
+    else:
+        # User reached route via GET (as by clicking a link or via redirect)
+        return render_template("quote.html")
 
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+    if request.method == "POST":
+        redirect("/")
+        
+    else:
+        return render_template("buy.html")    
 
 
 @app.route("/")
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+    if request.method == "POST":
+        redirect("/")
+
+    else:
+        return render_template("index.html")
 
 
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+    if request.method == "POST":
+        redirect("/")
+
+    else:
+        return render_template("sell.html")
 
 
 @app.route("/history")
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
+    if request.method == "POST":
+        redirect("/")
+
+    else:
+        return render_template("history.html")
 
 
 def errorhandler(e):
