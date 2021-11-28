@@ -262,70 +262,66 @@ def buy():
 @login_required
 def index():
     """Show portfolio of stocks"""
+
     # Get user_id
     user_id = session.get("user_id")
 
-    # Get user company id list
-    company_id = db.execute(
-        "SELECT company_id FROM assets WHERE user_id = ?", user_id)
-    company_id = [x['company_id'] for x in company_id]\
+        # Get user company id list
+        company_id = db.execute(
+            "SELECT company_id FROM assets WHERE user_id = ?", user_id)
+        company_id = [x['company_id'] for x in company_id]\
 
-    # List of symbols, company_names, shares, price, and total_price
-    symbols_list = []
-    company_names_list = []
-    current_shares_list = []
-    price_list = []
-    total_price_list = []
+        # List of symbols, company_names, shares, price, and total_price
+        symbols_list = []
+        company_names_list = []
+        current_shares_list = []
+        price_list = []
+        total_price_list = []
 
-    # Get user company names list
-    for company in company_id:
+        # Get user company names list
+        for company in company_id:
 
-        symbol = db.execute(
-            "SELECT symbol FROM companies WHERE id = ?", company)
-        stocks = lookup(symbol[0]["symbol"])
-        symbols_list.append(stocks["symbol"])
+            symbol = db.execute(
+                "SELECT symbol FROM companies WHERE id = ?", company)
+            stocks = lookup(symbol[0]["symbol"])
+            symbols_list.append(stocks["symbol"])
 
-        company_name = db.execute(
-            "SELECT company_name FROM companies WHERE id = ?", company)
-        company_name = company_name[0]["company_name"]
-        company_names_list.append(company_name)
+            company_name = db.execute(
+                "SELECT company_name FROM companies WHERE id = ?", company)
+            company_name = company_name[0]["company_name"]
+            company_names_list.append(company_name)
 
-        # Get user all current shares list
-        current_shares = db.execute(
-            "SELECT current_shares FROM assets WHERE user_id = ? AND company_id = ?", user_id, company)
-        current_shares = current_shares[0]["current_shares"]
-        current_shares_list.append(current_shares)
+            # Get user all current shares list
+            current_shares = db.execute(
+                "SELECT current_shares FROM assets WHERE user_id = ? AND company_id = ?", user_id, company)
+            current_shares = current_shares[0]["current_shares"]
+            current_shares_list.append(current_shares)
 
-        price = stocks["price"]
-        price_list.append(price)
+            price = stocks["price"]
+            price_list.append(price)
 
-        total_price = price * current_shares
-        total_price_list.append(total_price)
+            total_price = price * current_shares
+            total_price_list.append(total_price)
 
-    # Update user cash
-    cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)
-    cash = cash[0]["cash"]
+        # Update user cash
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)
+        cash = cash[0]["cash"]
 
-    length = len(symbols_list)
-    print(length)
-    print(symbols_list)
-    print(company_names_list)
-    print(current_shares_list)
-    print(price_list)
-    print(total_price_list)
-    print(cash)
-    
-    TOTAL = cash
+        print(symbols_list)
+        print(company_names_list)
+        print(current_shares_list)
+        print(price_list)
+        print(total_price_list)
+        print(cash)
+        
+        TOTAL = cash
 
-    for total in total_price_list:
-        TOTAL = TOTAL + total
-    print(TOTAL)
-    
-    # Redirect user to homepage
-    return render_template(
-        "index.html", length = length, symbols_list = symbols_list, company_names_list = company_names_list,
-        current_shares_list = current_shares_list, price_list = price_list, total_price_list = total_price_list,
-        cash = cash, TOTAL = TOTAL)
+        for total in total_price_list:
+            TOTAL = TOTAL + total
+        print(TOTAL)
+        
+        # Redirect user to homepage
+        return redirect("/")
 
 
 @app.route("/sell", methods=["GET", "POST"])

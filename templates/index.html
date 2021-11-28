@@ -15,17 +15,35 @@
                 <th class="text-end">TOTAL</th>
             </tr>
         </thead>
-       <tbody>
-            
+        <tbody>
+            {% for i in range(length) %}
+                <tr>
+                    <td>
+                        {{ symbols_list[i] }}
+                    </td>
+                    <td>
+                        {{ company_names_list[i] }}
+                    </td>
+                    <td>
+                        {{ current_shares_list[i] }}
+                    </td>
+                    <td>
+                        {{ price_list[i] }}
+                    </td>
+                    <td>
+                        {{ total_price_list[i] }}
+                    </td>
+                </tr>
+            {% endfor %}
         </tbody>
         <tfoot>
             <tr>
                 <td class="border-0 fw-bold text-end" colspan="4">Cash</td>
-                <td class="border-0 text-end">$10,000.00</td>
+                <td class="border-0 text-end"> {{ cash }} </td>
             </tr>
             <tr>
                 <td class="border-0 fw-bold text-end" colspan="4">TOTAL</td>
-                <td class="border-0 w-bold text-end">$10,000.00</td>
+                <td class="border-0 w-bold text-end"> {{ TOTAL }} </td>
             </tr>
         </tfoot>
     </table>
