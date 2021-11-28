@@ -28,22 +28,22 @@
                         {{ current_shares_list[i] }}
                     </td>
                     <td>
-                        {{ price_list[i] }}
+                        ${{ price_list[i] }}
                     </td>
                     <td>
-                        {{ total_price_list[i] }}
+                        ${{ total_price_list[i] }}
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
         <tfoot>
             <tr>
-                <td class="border-0 fw-bold text-end" colspan="4">Cash</td>
-                <td class="border-0 text-end"> {{ cash }} </td>
+                <td class="border-0 fw-bold text-end" colspan="4">CASH</td>
+                <td class="border-0 text-end"> ${{ cash }} </td>
             </tr>
             <tr>
                 <td class="border-0 fw-bold text-end" colspan="4">TOTAL</td>
-                <td class="border-0 w-bold text-end"> {{ TOTAL }} </td>
+                <td class="border-0 w-bold text-end"> ${{ TOTAL }} </td>
             </tr>
         </tfoot>
     </table>

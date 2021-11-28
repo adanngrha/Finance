@@ -15,7 +15,26 @@
             </tr>
         </thead>
         <tbody>
-            
+            {% for transaction in transactions %}
+            <tr>
+                <td>
+                    {{ transaction.symbol }}
+                </td>
+                <td>
+                    {% if transaction.transaction_type == 'buy' %}
+                        {{ transaction.shares }}
+                    {% else %}
+                        -{{ transaction.shares }}
+                    {% endif %}
+                </td>
+                <td>
+                    {{ transaction.price }}
+                </td>
+                <td>
+                    {{transaction.transacted}}
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 {% endblock %}

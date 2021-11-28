@@ -396,12 +396,16 @@ def sell():
 @login_required
 def history():
     """Show history of transactions"""
-    if request.method == "POST":
+    
+    # Get user_id
+    user_id = session.get("user_id")
+    
+    # Symbols, shares, prices, and transacted
+    transactions = db.execute(
+        "SELECT companies.symbol, transaction_type, shares, price, transacted FROM transactions JOIN companies ON transactions.company_id = companies.id WHERE user_id = ?", 
+        user_id)
         
-        return redirect("/")
-
-    else:
-        return render_template("history.html")
+    return render_template("history.html", transactions = transactions)
 
 
 def errorhandler(e):
