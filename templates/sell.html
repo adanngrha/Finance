@@ -9,6 +9,9 @@
         <div class="mb-3">
             <select title="symbol" class="form-select mx-auto w-auto form-control text-center" name="symbol">
                 <option disabled selected>Symbol</option>
+                {% for symbol in symbols_list %}
+                    <option value="{{ symbol }}">{{ symbol }}</option>
+                {% endfor %}
             </select>
         </div>
         <div class="mb-3">

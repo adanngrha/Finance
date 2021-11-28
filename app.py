@@ -268,7 +268,7 @@ def index():
     # Get user company id list
     company_id = db.execute(
         "SELECT company_id FROM assets WHERE user_id = ?", user_id)
-    company_id = [x['company_id'] for x in company_id]\
+    company_id = [x['company_id'] for x in company_id]
 
     # List of symbols, company_names, shares, price, and total_price
     symbols_list = []
@@ -307,19 +307,11 @@ def index():
     cash = cash[0]["cash"]
 
     length = len(symbols_list)
-    print(length)
-    print(symbols_list)
-    print(company_names_list)
-    print(current_shares_list)
-    print(price_list)
-    print(total_price_list)
-    print(cash)
     
     TOTAL = cash
 
     for total in total_price_list:
         TOTAL = TOTAL + total
-    print(TOTAL)
     
     # Redirect user to homepage
     return render_template(
@@ -333,10 +325,71 @@ def index():
 def sell():
     """Sell shares of stock"""
     if request.method == "POST":
+        # Get user_id
+        user_id = session.get("user_id")
+        
+        symbol = request.form.get("symbol")
+        shares = request.form.get("shares")
+
+        stocks = lookup(symbol)
+        price = stocks["price"]
+        price = price * float(shares)
+                
+        # Check user cash
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)
+        cash = cash[0]["cash"]
+        cash = cash + price 
+
+        # Get company id
+        company_id = db.execute("SELECT id FROM companies WHERE symbol = ?", symbol)
+        company_id = company_id[0]["id"]
+        
+        # Transaction datetime
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Update assets table if shares = 0 DELETE
+        # Get company available shares
+        available_shares = db.execute(
+            "SELECT current_shares FROM assets WHERE user_id = ? AND company_id = ?", user_id, company_id)
+        available_shares = available_shares[0]["current_shares"]
+        available_shares = available_shares - int(shares)
+        if available_shares == 0:
+            # DELETE
+            db.execute("DELETE FROM assets WHERE user_id = ? AND company_id = ?", user_id, company_id) 
+        else:
+            # UPDATE
+            db.execute("UPDATE assets SET current_shares = ? WHERE user_id = ? AND company_id = ?", 
+                       available_shares, user_id, company_id)
+        
+        # Insert to transactions table
+        db.execute(
+            "INSERT INTO transactions (user_id, company_id, transaction_type, shares, price, transacted) VALUES(?, ?, ?, ?, ?, ?)",
+            user_id, company_id, "sell", shares, price, now)
+        
+        # Update user cash
+        db.execute("UPDATE users SET cash = ? WHERE id = ?", cash, user_id)
+        
+        # Redirect user to homepage
         return redirect("/")
 
     else:
-        return render_template("sell.html")
+        # Get user_id
+        user_id = session.get("user_id")
+        
+        # Get user company id list
+        company_id = db.execute(
+        "SELECT company_id FROM assets WHERE user_id = ?", user_id)
+        company_id = [x['company_id'] for x in company_id]
+        
+        # Symbols list 
+        symbols_list = []
+        
+        for company in company_id:
+            symbol = db.execute(
+            "SELECT symbol FROM companies WHERE id = ?", company)
+            symbol = symbol[0]["symbol"]
+            symbols_list.append(symbol)
+        return render_template("sell.html", symbols_list = symbols_list)
 
 
 @app.route("/history")
@@ -344,6 +397,7 @@ def sell():
 def history():
     """Show history of transactions"""
     if request.method == "POST":
+        
         return redirect("/")
 
     else:
